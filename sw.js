@@ -1,9 +1,4 @@
-const CACHE_NAME = 'tariq-al-muslim-cache-v1';
-const urlsToCache = [
-    '/',
-    'index.html',
-    'style.css',
-    'app.const CACHE_NAME = 'muslim-way-cache-v1';
+const CACHE_NAME = 'muslim-way-cache-v1';
 const urlsToCache = [
     './',
     './index.html',
@@ -34,6 +29,7 @@ self.addEventListener('fetch', event => {
                 return fetch(event.request);
             })
     );
+});
 });
 ',
     'manifest.json'
