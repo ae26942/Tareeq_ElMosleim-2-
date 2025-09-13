@@ -14,19 +14,24 @@
     <div id="welcome-screen">
         <p>نسألكم الدعاء بالعفو والعافية، آمين</p>
     </div>
-
     <div id="main-app" style="display:none;">
-        <header>
-            <h1>طريق المسلم</h1>
-        </header>
-
-        <div class="sections-container">
-            </div>
-
-        <nav class="bottom-nav">
-            </nav>
+        <div id="content-container">
+            <header>
+                <h1>طريق المسلم</h1>
+            </header>
+            <div class="sections-container"></div>
+            <nav class="bottom-nav"></nav>
+        </div>
     </div>
-
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
 </body>
 </html>
