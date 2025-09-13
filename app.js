@@ -125,7 +125,7 @@ function renderSections() {
         card.appendChild(iconDiv);
         card.appendChild(title);
 
-        if (section.type === 'azkar') {
+        if (section.type === 'azkar' && section.id !== 'azkar-ham' && section.id !== 'azkar-tawba') {
             const alarmToggle = document.createElement('div');
             alarmToggle.className = 'alarm-toggle';
             const alarmButton = document.createElement('button');
@@ -230,9 +230,18 @@ function createAzkarPage(section) {
             }
         };
         
+        const skipButton = document.createElement('button');
+        skipButton.className = 'skip-button';
+        skipButton.textContent = 'تخطي';
+        skipButton.onclick = () => {
+            currentAzkarIndex++;
+            renderCurrentAzkar();
+        };
+
         azkarContainer.appendChild(azkarText);
         azkarContainer.appendChild(counterDisplay);
         azkarContainer.appendChild(counterButton);
+        azkarContainer.appendChild(skipButton);
     }
     
     const container = document.createElement('div');
