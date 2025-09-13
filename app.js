@@ -87,8 +87,16 @@ const sections = [
     { name: 'أذكار الهم والحزن', color: 'brown', icon: '😔', id: 'azkar-ham', type: 'azkar' },
     { name: 'أذكار التوبة', color: 'grey', icon: '🤲', id: 'azkar-tawba', type: 'azkar' },
     { name: 'مواقيت الصلاة', color: 'orange', icon: '🕌', id: 'prayer-times', type: 'prayer' },
-    { name: 'للتواصل', color: 'teal', icon: '📞', id: 'contact', type: 'contact' }
+    { name: 'تواصل معنا', color: 'teal', icon: '📞', id: 'contact', type: 'contact' }
 ];
+
+let alarmIntervals = {};
+let alarmState = JSON.parse(localStorage.getItem('alarmState')) || {
+    'azkar-sabah': false,
+    'azkar-masaa': false,
+    'azkar-noom': false,
+    'azkar-estikaaz': false,
+};
 
 function hideWelcomeScreen() {
     const welcomeScreen = document.getElementById('welcome-screen');
@@ -116,8 +124,63 @@ function renderSections() {
         title.textContent = section.name;
         card.appendChild(iconDiv);
         card.appendChild(title);
+
+        if (section.type === 'azkar') {
+            const alarmToggle = document.createElement('div');
+            alarmToggle.className = 'alarm-toggle';
+            const alarmButton = document.createElement('button');
+            alarmButton.textContent = alarmState[section.id] ? 'إيقاف التذكير' : 'تفعيل التذكير';
+            alarmButton.className = alarmState[section.id] ? '' : 'off';
+            alarmButton.onclick = (e) => {
+                e.stopPropagation();
+                toggleAlarm(section.id);
+            };
+            alarmToggle.appendChild(alarmButton);
+            card.appendChild(alarmToggle);
+        }
+
         sectionsContainer.appendChild(card);
     });
+}
+
+function toggleAlarm(sectionId) {
+    alarmState[sectionId] = !alarmState[sectionId];
+    localStorage.setItem('alarmState', JSON.stringify(alarmState));
+    renderSections();
+    if (alarmState[sectionId]) {
+        setAlarm(sectionId);
+    } else {
+        clearAlarm(sectionId);
+    }
+}
+
+function setAlarm(sectionId) {
+    const now = new Date();
+    let alarmTime = new Date();
+
+    if (sectionId === 'azkar-sabah') alarmTime.setHours(5, 0, 0, 0);
+    else if (sectionId === 'azkar-estikaaz') alarmTime.setHours(7, 0, 0, 0);
+    else if (sectionId === 'azkar-masaa') alarmTime.setHours(17, 0, 0, 0);
+    else if (sectionId === 'azkar-noom') alarmTime.setHours(22, 0, 0, 0);
+
+    if (alarmTime < now) {
+        alarmTime.setDate(alarmTime.getDate() + 1);
+    }
+
+    const timeToAlarm = alarmTime.getTime() - now.getTime();
+    
+    alarmIntervals[sectionId] = setTimeout(() => {
+        alert(`حان وقت ${sections.find(s => s.id === sectionId).name}`);
+        // إعادة ضبط المنبه لليوم التالي
+        setAlarm(sectionId);
+    }, timeToAlarm);
+}
+
+function clearAlarm(sectionId) {
+    if (alarmIntervals[sectionId]) {
+        clearTimeout(alarmIntervals[sectionId]);
+        delete alarmIntervals[sectionId];
+    }
 }
 
 function createAzkarPage(section) {
@@ -188,7 +251,6 @@ function fetchPrayerTimes() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
             const { latitude, longitude } = position.coords;
-            const today = new Date();
             const url = `https://api.aladhan.com/v1/timingsByCity?city=Cairo&country=Egypt`;
             fetch(url)
                 .then(response => response.json())
@@ -206,6 +268,15 @@ function fetchPrayerTimes() {
     }
 }
 
+function format12Hour(time) {
+    const [hour, minute] = time.split(':');
+    let h = parseInt(hour);
+    let ampm = h >= 12 ? 'م' : 'ص';
+    h = h % 12;
+    h = h ? h : 12; // the hour '0' should be '12'
+    return `${h}:${minute} ${ampm}`;
+}
+
 function createPrayerTimesPage(timings) {
     const contentContainer = document.getElementById('content-container');
     contentContainer.innerHTML = '';
@@ -216,12 +287,22 @@ function createPrayerTimesPage(timings) {
     const title = document.createElement('h2');
     title.textContent = 'مواقيت الصلاة';
     title.style.textAlign = 'center';
+
+    const prayerNames = {
+        Fajr: 'الفجر',
+        Dhuhr: 'الظهر',
+        Asr: 'العصر',
+        Maghrib: 'المغرب',
+        Isha: 'العشاء'
+    };
+
     const timingsList = document.createElement('ul');
     timingsList.className = 'prayer-time-list';
+    
     for (const prayer in timings) {
-        if (typeof timings[prayer] === 'string' && ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].includes(prayer)) {
+        if (typeof timings[prayer] === 'string' && prayerNames[prayer]) {
             const listItem = document.createElement('li');
-            listItem.textContent = `${prayer}: ${timings[prayer]}`;
+            listItem.textContent = `${prayerNames[prayer]}: ${format12Hour(timings[prayer])}`;
             timingsList.appendChild(listItem);
         }
     }
@@ -233,9 +314,38 @@ function createPrayerTimesPage(timings) {
     contentContainer.appendChild(container);
 }
 
+function showContactInfo() {
+    const contentContainer = document.getElementById('content-container');
+    contentContainer.innerHTML = '';
+    const backButton = document.createElement('button');
+    backButton.textContent = 'رجوع';
+    backButton.className = 'back-button';
+    backButton.onclick = () => window.location.reload();
+    const contactSection = document.createElement('div');
+    contactSection.className = 'contact-section';
+    contactSection.innerHTML = `
+        <h3>تواصل معنا</h3>
+        <p>للشكاوى والاقتراحات: <strong>00201550243338</strong></p>
+        <p>بريد إلكتروني: <strong>pzkt@outlook.com</strong></p>
+        <p>للتبرع لدعم التطبيق وكسب الأجر يرجى التواصل على:</p>
+        <p><a href="https://wa.me/+201550243338" target="_blank">wa.me/+201550243338</a></p>
+    `;
+    const container = document.createElement('div');
+    container.className = 'section-page-content';
+    container.appendChild(backButton);
+    container.appendChild(contactSection);
+    contentContainer.appendChild(container);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     hideWelcomeScreen();
     renderSections();
+    Object.keys(alarmState).forEach(id => {
+        if (alarmState[id]) {
+            setAlarm(id);
+        }
+    });
+
     document.addEventListener('click', (event) => {
         const card = event.target.closest('.section-card');
         if (card) {
