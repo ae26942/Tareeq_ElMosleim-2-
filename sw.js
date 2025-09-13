@@ -1,16 +1,12 @@
 const CACHE_NAME = 'tariq-al-muslim-cache-v1';
 const urlsToCache = [
     '/',
-    '/index.html',
-    '/style.css',
-    '/app.js',
-    '/manifest.json',
-    // يمكنك إضافة صور الأيقونات هنا
-    // '/images/icon-192x192.png',
-    // '/images/icon-512x512.png'
+    'index.html',
+    'style.css',
+    'app.js',
+    'manifest.json'
 ];
 
-// دالة لتخزين الملفات
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -21,7 +17,6 @@ self.addEventListener('install', event => {
     );
 });
 
-// دالة لجلب الملفات من الذاكرة المؤقتة (Cache)
 self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
