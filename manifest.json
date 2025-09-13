@@ -1,19 +1,19 @@
 {
-    "name": "تطبيق طريق المسلم",
+    "name": "طريق المسلم",
     "short_name": "طريق المسلم",
-    "description": "تطبيق إسلامي لمساعدة المسلمين على أداء الأذكار ومتابعة مواقيت الصلاة.",
+    "description": "تطبيق شامل لأذكار المسلم ومواقيت الصلاة.",
     "start_url": "./",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2196F3",
+    "background_color": "#F8F9FA",
+    "theme_color": "#4CAF50",
     "icons": [
         {
-            "src": "images/icon-192x192.png",
+            "src": "assets/icon-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "images/icon-512x512.png",
+            "src": "assets/icon-512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
